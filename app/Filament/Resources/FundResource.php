@@ -66,28 +66,28 @@ class FundResource extends Resource
                             ->numeric()
                             ->required()
                             ->suffix('%')
-                            ->hydrateStateUsing(fn ($state) => $state !== null ? (float) $state * 100 : null)
+                            ->formatStateUsing(fn ($state) => $state !== null ? (float) $state * 100 : null)
                             ->dehydrateStateUsing(fn ($state) => $state !== null ? (float) $state / 100 : null),
                         TextInput::make('subscription_fee_rate')
                             ->label('Frais de souscription (%)')
                             ->numeric()
                             ->required()
                             ->suffix('%')
-                            ->hydrateStateUsing(fn ($state) => $state !== null ? (float) $state * 100 : null)
+                            ->formatStateUsing(fn ($state) => $state !== null ? (float) $state * 100 : null)
                             ->dehydrateStateUsing(fn ($state) => $state !== null ? (float) $state / 100 : null),
                         TextInput::make('management_fee_rate')
                             ->label('Frais de gestion annuels (%)')
                             ->numeric()
                             ->required()
                             ->suffix('%')
-                            ->hydrateStateUsing(fn ($state) => $state !== null ? (float) $state * 100 : null)
+                            ->formatStateUsing(fn ($state) => $state !== null ? (float) $state * 100 : null)
                             ->dehydrateStateUsing(fn ($state) => $state !== null ? (float) $state / 100 : null),
                         TextInput::make('exit_fee_rate')
                             ->label('Frais de rachat / sortie (%)')
                             ->numeric()
                             ->required()
                             ->suffix('%')
-                            ->hydrateStateUsing(fn ($state) => $state !== null ? (float) $state * 100 : null)
+                            ->formatStateUsing(fn ($state) => $state !== null ? (float) $state * 100 : null)
                             ->dehydrateStateUsing(fn ($state) => $state !== null ? (float) $state / 100 : null),
                     ])->columns(4),
 
