@@ -5,6 +5,8 @@ use App\Models\Fund;
 use App\Models\Lead;
 use App\Models\Simulation;
 use App\Domain\Financial\DcaSimulator;
+use App\Mail\ContactRequestMail;
+use Illuminate\Support\Facades\Mail;
 
 state([
     'step' => 1,
@@ -168,9 +170,30 @@ $requestContact = function (string $type) {
         $lead = Lead::find($this->leadId);
         if ($lead) {
             $lead->status = 'contacted';
-            $fundName = Fund::find($this->selectedFundId)?->name ?? 'Fonds inconnu';
-            $lead->notes = "Type de demande : {$type}. Intérêt pour le fonds {$fundName}. " . 'Simulation : Initiale = ' . number_format($this->initialInvestment) . ' FCFA, ' . 'Périodique = ' . number_format($this->periodicInvestment) . ' FCFA/mois, ' . "Durée = {$this->durationInYears} ans.";
+            $fund     = Fund::find($this->selectedFundId);
+            $fundName = $fund?->name ?? 'Fonds inconnu';
+            $lead->notes = "Type de demande : {$type}. Intérêt pour le fonds {$fundName}. "
+                . 'Simulation : Initiale = ' . number_format($this->initialInvestment) . ' FCFA, '
+                . 'Périodique = ' . number_format($this->periodicInvestment) . ' FCFA/mois, '
+                . "Durée = {$this->durationInYears} ans.";
             $lead->save();
+
+            // Envoi de l'e-mail de notification à l'équipe FCP
+            $finalBalance = $this->simulationResult['summary']['final_net_balance'] ?? 0;
+
+            Mail::to('fcp.koriserenite@koriassetmanagement.com')
+                ->send(new ContactRequestMail(
+                    type:         $type,
+                    leadName:     $lead->name,
+                    leadEmail:    $lead->email,
+                    leadPhone:    $lead->phone,
+                    whatsapp:     (bool) $lead->whatsapp_enabled,
+                    fundName:     $fundName,
+                    initial:      (float) $this->initialInvestment,
+                    periodic:     (float) $this->periodicInvestment,
+                    duration:     (float) $this->durationInYears,
+                    finalBalance: (float) $finalBalance,
+                ));
         }
     }
     $this->contactRequested = true;
