@@ -21,7 +21,7 @@ state([
     'funds' => fn() => Fund::all(),
     'selectedFundId' => null,
     'simulationMode' => 'capital', // 'capital', 'payment', 'duration'
-    'targetCapital' => 50000000,   // 50 Millions par défaut
+    'targetCapital' => 50000000, // 50 Millions par défaut
     'initialInvestment' => 0,
     'periodicInvestment' => 100000,
     'frequency' => 'monthly',
@@ -94,7 +94,7 @@ $nextStep = function () {
             $this->simulationResult = $dcaSimulator->simulate((float) $this->initialInvestment, (float) $this->periodicInvestment, (float) $this->durationInYears, (float) $fund->target_annual_return, $this->frequency, (float) $fund->subscription_fee_rate, (float) $fund->management_fee_rate, (float) $fund->exit_fee_rate);
         } elseif ($this->simulationMode === 'payment') {
             $this->periodicInvestment = $dcaSimulator->calculateRequiredPayment((float) $this->targetCapital, (float) $this->initialInvestment, (float) $this->durationInYears, (float) $fund->target_annual_return, $this->frequency, (float) $fund->subscription_fee_rate, (float) $fund->management_fee_rate, (float) $fund->exit_fee_rate);
-            
+
             $this->simulationResult = $dcaSimulator->simulate((float) $this->initialInvestment, (float) $this->periodicInvestment, (float) $this->durationInYears, (float) $fund->target_annual_return, $this->frequency, (float) $fund->subscription_fee_rate, (float) $fund->management_fee_rate, (float) $fund->exit_fee_rate);
         } elseif ($this->simulationMode === 'duration') {
             if ($this->periodicInvestment < $fund->min_periodic_investment) {
@@ -170,30 +170,15 @@ $requestContact = function (string $type) {
         $lead = Lead::find($this->leadId);
         if ($lead) {
             $lead->status = 'contacted';
-            $fund     = Fund::find($this->selectedFundId);
+            $fund = Fund::find($this->selectedFundId);
             $fundName = $fund?->name ?? 'Fonds inconnu';
-            $lead->notes = "Type de demande : {$type}. Intérêt pour le fonds {$fundName}. "
-                . 'Simulation : Initiale = ' . number_format($this->initialInvestment) . ' FCFA, '
-                . 'Périodique = ' . number_format($this->periodicInvestment) . ' FCFA/mois, '
-                . "Durée = {$this->durationInYears} ans.";
+            $lead->notes = "Type de demande : {$type}. Intérêt pour le fonds {$fundName}. " . 'Simulation : Initiale = ' . number_format($this->initialInvestment) . ' FCFA, ' . 'Périodique = ' . number_format($this->periodicInvestment) . ' FCFA/mois, ' . "Durée = {$this->durationInYears} ans.";
             $lead->save();
 
             // Envoi de l'e-mail de notification à l'équipe FCP
             $finalBalance = $this->simulationResult['summary']['final_net_balance'] ?? 0;
 
-            Mail::to('fcp.koriserenite@koriassetmanagement.com')
-                ->send(new ContactRequestMail(
-                    type:         $type,
-                    leadName:     $lead->name,
-                    leadEmail:    $lead->email,
-                    leadPhone:    $lead->phone,
-                    whatsapp:     (bool) $lead->whatsapp_enabled,
-                    fundName:     $fundName,
-                    initial:      (float) $this->initialInvestment,
-                    periodic:     (float) $this->periodicInvestment,
-                    duration:     (float) $this->durationInYears,
-                    finalBalance: (float) $finalBalance,
-                ));
+            Mail::to('fcp.koriserenite@koriassetmanagement.com')->send(new ContactRequestMail(type: $type, leadName: $lead->name, leadEmail: $lead->email, leadPhone: $lead->phone, whatsapp: (bool) $lead->whatsapp_enabled, fundName: $fundName, initial: (float) $this->initialInvestment, periodic: (float) $this->periodicInvestment, duration: (float) $this->durationInYears, finalBalance: (float) $finalBalance));
         }
     }
     $this->contactRequested = true;
@@ -232,7 +217,7 @@ $requestContact = function (string $type) {
         <!-- ÉTAPE 1 : ACCUEIL -->
         @if ($step === 1)
             <div class="text-center space-y-6 max-w-2xl mx-auto py-6">
-                <div class="inline-flex p-3 rounded-full bg-kori-light text-kori-brown">
+                {{-- <div class="inline-flex p-3 rounded-full bg-kori-light text-kori-brown">
                     <!-- Icon Cauri du logo -->
                     <svg class="h-16 w-auto" viewBox="0 0 100 120" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path
@@ -244,7 +229,7 @@ $requestContact = function (string $type) {
                             d="M50 8c-3 10-1.5 14-4 18c3 4 1 8-1 12c3 4 0.5 8-1.5 12c2.5 4 0.5 8-.5 12c2.5 4 0 8 1.5 12c-2 4 1.5 8-1.5 12 c1 4-1.5 8-3.5 14c5-8 3-12 5-16c-1.5-4 1-8 2.5-12c-2-4 .5-8 1.5-12c-2-4 .5-8 1.5-12c-1.5-4 1-8 2-12 c-2-4 0.5-8-1.5-12c1.5-4-1-8-2.5-12c2-4 0-8-1-12c2-4-0.5-8-1.5-12c2-4 0.5-6-1.5-10"
                             fill="#fff" />
                     </svg>
-                </div>
+                </div> --}}
                 <h1 class="text-3xl font-extrabold text-kori-brown tracking-tight leading-tight">
                     Optimisez vos placements avec notre simulateur financier premium
                 </h1>
@@ -342,21 +327,28 @@ $requestContact = function (string $type) {
             }">
                 <div class="text-center">
                     <h2 class="text-2xl font-bold text-kori-brown">Configurez votre projet de placement</h2>
-                    <p class="text-gray-500 text-sm mt-1">Choisissez votre mode de simulation et glissez les curseurs.</p>
+                    <p class="text-gray-500 text-sm mt-1">Choisissez votre mode de simulation et glissez les curseurs.
+                    </p>
                 </div>
 
                 <!-- Sélecteur de Mode (Tabs) -->
                 <div class="flex border-b border-gray-200">
-                    <button @click="mode = 'capital'" class="flex-1 py-3 text-center border-b-2 text-xs md:text-sm font-bold transition-all"
-                        :class="mode === 'capital' ? 'border-kori-brown text-kori-brown' : 'border-transparent text-gray-400 hover:text-gray-600'">
+                    <button @click="mode = 'capital'"
+                        class="flex-1 py-3 text-center border-b-2 text-xs md:text-sm font-bold transition-all"
+                        :class="mode === 'capital' ? 'border-kori-brown text-kori-brown' :
+                            'border-transparent text-gray-400 hover:text-gray-600'">
                         Estimer mon capital futur
                     </button>
-                    <button @click="mode = 'payment'" class="flex-1 py-3 text-center border-b-2 text-xs md:text-sm font-bold transition-all"
-                        :class="mode === 'payment' ? 'border-kori-brown text-kori-brown' : 'border-transparent text-gray-400 hover:text-gray-600'">
+                    <button @click="mode = 'payment'"
+                        class="flex-1 py-3 text-center border-b-2 text-xs md:text-sm font-bold transition-all"
+                        :class="mode === 'payment' ? 'border-kori-brown text-kori-brown' :
+                            'border-transparent text-gray-400 hover:text-gray-600'">
                         Calculer mon versement requis
                     </button>
-                    <button @click="mode = 'duration'" class="flex-1 py-3 text-center border-b-2 text-xs md:text-sm font-bold transition-all"
-                        :class="mode === 'duration' ? 'border-kori-brown text-kori-brown' : 'border-transparent text-gray-400 hover:text-gray-600'">
+                    <button @click="mode = 'duration'"
+                        class="flex-1 py-3 text-center border-b-2 text-xs md:text-sm font-bold transition-all"
+                        :class="mode === 'duration' ? 'border-kori-brown text-kori-brown' :
+                            'border-transparent text-gray-400 hover:text-gray-600'">
                         Déterminer le temps nécessaire
                     </button>
                 </div>
@@ -366,11 +358,13 @@ $requestContact = function (string $type) {
                     <div class="space-y-6">
                         <!-- Sélection du Fonds -->
                         <div>
-                            <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Fonds d'investissement</label>
+                            <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Fonds
+                                d'investissement</label>
                             <select wire:model.live="selectedFundId"
                                 class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-kori-brown focus:border-kori-brown @error('selectedFundId') border-red-500 @enderror">
                                 @foreach ($funds as $fund)
-                                    <option value="{{ $fund->id }}">{{ $fund->name }} (Rendement: {{ number_format($fund->target_annual_return * 100, 2) }}%)</option>
+                                    <option value="{{ $fund->id }}">{{ $fund->name }} (Rendement:
+                                        {{ number_format($fund->target_annual_return * 100, 2) }}%)</option>
                                 @endforeach
                             </select>
                             @error('selectedFundId')
@@ -381,8 +375,10 @@ $requestContact = function (string $type) {
                         <!-- 1. Capital Cible (Mode B et C) -->
                         <div x-show="mode !== 'capital'" x-transition>
                             <div class="flex justify-between mb-2">
-                                <label class="text-xs font-bold text-gray-700 uppercase tracking-wider">Capital Cible à acquérir (FCFA)</label>
-                                <span class="text-sm font-extrabold text-kori-brown" x-text="Number(target).toLocaleString('fr-FR') + ' FCFA'"></span>
+                                <label class="text-xs font-bold text-gray-700 uppercase tracking-wider">Capital Cible à
+                                    acquérir (FCFA)</label>
+                                <span class="text-sm font-extrabold text-kori-brown"
+                                    x-text="Number(target).toLocaleString('fr-FR') + ' FCFA'"></span>
                             </div>
                             <input type="range" min="1000000" max="250000000" step="1000000" x-model="target"
                                 class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-kori-brown">
@@ -394,8 +390,10 @@ $requestContact = function (string $type) {
                         <!-- 2. Investissement Initial (Tous Modes) -->
                         <div>
                             <div class="flex justify-between mb-2">
-                                <label class="text-xs font-bold text-gray-700 uppercase tracking-wider">Apport Initial (FCFA) - Optionnel</label>
-                                <span class="text-sm font-extrabold text-kori-brown" x-text="Number(initial).toLocaleString('fr-FR') + ' FCFA'"></span>
+                                <label class="text-xs font-bold text-gray-700 uppercase tracking-wider">Apport Initial
+                                    (FCFA) - Optionnel</label>
+                                <span class="text-sm font-extrabold text-kori-brown"
+                                    x-text="Number(initial).toLocaleString('fr-FR') + ' FCFA'"></span>
                             </div>
                             <input type="range" min="0" max="50000000" step="100000" x-model="initial"
                                 class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-kori-brown">
@@ -407,8 +405,10 @@ $requestContact = function (string $type) {
                         <!-- 3. Versement Périodique (Mode A et C) -->
                         <div x-show="mode !== 'payment'" x-transition>
                             <div class="flex justify-between mb-2">
-                                <label class="text-xs font-bold text-gray-700 uppercase tracking-wider">Versement Périodique souhaité (FCFA)</label>
-                                <span class="text-sm font-extrabold text-kori-brown" x-text="Number(periodic).toLocaleString('fr-FR') + ' FCFA'"></span>
+                                <label class="text-xs font-bold text-gray-700 uppercase tracking-wider">Versement
+                                    Périodique souhaité (FCFA)</label>
+                                <span class="text-sm font-extrabold text-kori-brown"
+                                    x-text="Number(periodic).toLocaleString('fr-FR') + ' FCFA'"></span>
                             </div>
                             <input type="range" min="10000" max="5000000" step="10000" x-model="periodic"
                                 class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-kori-brown">
@@ -420,7 +420,8 @@ $requestContact = function (string $type) {
                         <!-- Fréquence et Durée -->
                         <div class="grid grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Fréquence</label>
+                                <label
+                                    class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Fréquence</label>
                                 <select wire:model.live="frequency"
                                     class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-kori-brown focus:border-kori-brown">
                                     <option value="monthly">Mensuelle</option>
@@ -429,9 +430,12 @@ $requestContact = function (string $type) {
                                 </select>
                             </div>
                             <div>
-                                <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Durée (Années)</label>
+                                <label
+                                    class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Durée
+                                    (Années)</label>
                                 <template x-if="mode === 'duration'">
-                                    <div class="w-full px-4 py-3 bg-gray-100 border border-gray-200 rounded-xl text-gray-500 font-semibold text-sm">
+                                    <div
+                                        class="w-full px-4 py-3 bg-gray-100 border border-gray-200 rounded-xl text-gray-500 font-semibold text-sm">
                                         Calculée automatiquement
                                     </div>
                                 </template>
@@ -439,7 +443,8 @@ $requestContact = function (string $type) {
                                     <select wire:model.live="durationInYears"
                                         class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-kori-brown focus:border-kori-brown">
                                         @for ($i = 1; $i <= 30; $i++)
-                                            <option value="{{ $i }}">{{ $i }} {{ $i > 1 ? 'ans' : 'an' }}</option>
+                                            <option value="{{ $i }}">{{ $i }}
+                                                {{ $i > 1 ? 'ans' : 'an' }}</option>
                                         @endfor
                                     </select>
                                 </template>
@@ -448,7 +453,8 @@ $requestContact = function (string $type) {
                     </div>
 
                     <!-- Détails du fonds choisi -->
-                    <div class="bg-kori-light rounded-2xl p-6 border border-kori-brown/10 flex flex-col justify-between">
+                    <div
+                        class="bg-kori-light rounded-2xl p-6 border border-kori-brown/10 flex flex-col justify-between">
                         @php
                             $currentFund = $funds->firstWhere('id', $selectedFundId) ?? $funds->first();
                         @endphp
@@ -456,20 +462,26 @@ $requestContact = function (string $type) {
                         @if ($currentFund)
                             <div class="space-y-4">
                                 <div class="flex items-center justify-between">
-                                    <span class="text-xs font-bold px-2.5 py-1 rounded bg-kori-brown/10 text-kori-brown uppercase">Fonds choisi</span>
-                                    <span class="text-xs font-bold px-2 py-0.5 rounded {{ $currentFund->risk_level <= 2 ? 'bg-emerald-100 text-emerald-800' : ($currentFund->risk_level <= 4 ? 'bg-amber-100 text-amber-800' : 'bg-red-100 text-red-800') }}">
+                                    <span
+                                        class="text-xs font-bold px-2.5 py-1 rounded bg-kori-brown/10 text-kori-brown uppercase">Fonds
+                                        choisi</span>
+                                    <span
+                                        class="text-xs font-bold px-2 py-0.5 rounded {{ $currentFund->risk_level <= 2 ? 'bg-emerald-100 text-emerald-800' : ($currentFund->risk_level <= 4 ? 'bg-amber-100 text-amber-800' : 'bg-red-100 text-red-800') }}">
                                         Risque : {{ $currentFund->risk_level }}/7
                                     </span>
                                 </div>
                                 <h3 class="text-lg font-bold text-kori-brown">{{ $currentFund->name }}</h3>
-                                <p class="text-gray-500 text-sm leading-relaxed font-light">{{ $currentFund->description }}</p>
+                                <p class="text-gray-500 text-sm leading-relaxed font-light">
+                                    {{ $currentFund->description }}</p>
 
                                 <hr class="border-gray-200">
 
                                 <div class="grid grid-cols-2 gap-4 text-sm pt-2">
                                     <div>
                                         <span class="text-xs text-gray-400 block">Rendement Cible Annuel</span>
-                                        <span class="font-extrabold text-emerald-600 text-lg">{{ number_format($currentFund->target_annual_return * 100, 2) }} %</span>
+                                        <span
+                                            class="font-extrabold text-emerald-600 text-lg">{{ number_format($currentFund->target_annual_return * 100, 2) }}
+                                            %</span>
                                     </div>
                                     <div>
                                         <span class="text-xs text-gray-400 block">Code ISIN</span>
@@ -477,11 +489,15 @@ $requestContact = function (string $type) {
                                     </div>
                                     <div>
                                         <span class="text-xs text-gray-400 block">Frais de souscription</span>
-                                        <span class="font-semibold text-gray-700">{{ number_format($currentFund->subscription_fee_rate * 100, 2) }} %</span>
+                                        <span
+                                            class="font-semibold text-gray-700">{{ number_format($currentFund->subscription_fee_rate * 100, 2) }}
+                                            %</span>
                                     </div>
                                     <div>
                                         <span class="text-xs text-gray-400 block">Frais de gestion annuels</span>
-                                        <span class="font-semibold text-gray-700">{{ number_format($currentFund->management_fee_rate * 100, 2) }} %</span>
+                                        <span
+                                            class="font-semibold text-gray-700">{{ number_format($currentFund->management_fee_rate * 100, 2) }}
+                                            %</span>
                                     </div>
                                 </div>
                             </div>
@@ -507,32 +523,53 @@ $requestContact = function (string $type) {
             @php
                 $yearsInt = (int) floor($durationInYears);
                 $monthsInt = (int) round(($durationInYears - $yearsInt) * 12);
-                $durationText = $yearsInt > 0 
-                    ? $yearsInt . ($yearsInt > 1 ? ' ans' : ' an') . ($monthsInt > 0 ? ' et ' . $monthsInt . ' mois' : '')
-                    : $monthsInt . ' mois';
+                $durationText =
+                    $yearsInt > 0
+                        ? $yearsInt .
+                            ($yearsInt > 1 ? ' ans' : ' an') .
+                            ($monthsInt > 0 ? ' et ' . $monthsInt . ' mois' : '')
+                        : $monthsInt . ' mois';
             @endphp
             <div class="space-y-8" x-data="chartContainer()">
                 <div class="text-center">
                     <h2 class="text-2xl font-bold text-kori-brown">Votre projection de placement</h2>
-                    <p class="text-gray-500 text-sm mt-1">Voici les résultats de votre simulation sur {{ $durationText }}.</p>
+                    <p class="text-gray-500 text-sm mt-1">Voici les résultats de votre simulation sur
+                        {{ $durationText }}.</p>
                 </div>
 
                 <!-- Bloc Synthèse Recommandation commerciale FCP -->
                 <div class="bg-kori-light border border-kori-brown/10 rounded-2xl p-6 flex items-start space-x-4">
                     <div class="p-3 bg-kori-brown/10 text-kori-brown rounded-xl flex-shrink-0 mt-0.5">
-                        <svg class="w-7 h-7 text-kori-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        <svg class="w-7 h-7 text-kori-gold" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                     </div>
                     <div>
                         <h4 class="font-bold text-kori-brown text-base">Plan de Placement Personnalisé</h4>
                         <p class="text-sm text-gray-600 mt-1 leading-relaxed">
                             @if ($simulationMode === 'capital')
-                                En versant <strong>{{ number_format($periodicInvestment, 0, ',', ' ') }} FCFA</strong> par {{ $frequency === 'monthly' ? 'mois' : ($frequency === 'quarterly' ? 'trimestre' : 'an') }} pendant <strong>{{ $durationText }}</strong>, votre capital net final estimé sera de <strong class="text-kori-brown text-base">{{ number_format($simulationResult['summary']['final_net_balance'], 0, ',', ' ') }} FCFA</strong>.
+                                En versant <strong>{{ number_format($periodicInvestment, 0, ',', ' ') }} FCFA</strong>
+                                par
+                                {{ $frequency === 'monthly' ? 'mois' : ($frequency === 'quarterly' ? 'trimestre' : 'an') }}
+                                pendant <strong>{{ $durationText }}</strong>, votre capital net final estimé sera de
+                                <strong
+                                    class="text-kori-brown text-base">{{ number_format($simulationResult['summary']['final_net_balance'], 0, ',', ' ') }}
+                                    FCFA</strong>.
                             @elseif ($simulationMode === 'payment')
-                                Pour acquérir un capital de <strong>{{ number_format($targetCapital, 0, ',', ' ') }} FCFA</strong> net sous <strong>{{ $durationText }}</strong>, vous devez effectuer un versement périodique de <strong class="text-kori-brown text-base">{{ number_format($periodicInvestment, 0, ',', ' ') }} FCFA</strong> par {{ $frequency === 'monthly' ? 'mois' : ($frequency === 'quarterly' ? 'trimestre' : 'an') }}.
+                                Pour acquérir un capital de <strong>{{ number_format($targetCapital, 0, ',', ' ') }}
+                                    FCFA</strong> net sous <strong>{{ $durationText }}</strong>, vous devez effectuer
+                                un versement périodique de <strong
+                                    class="text-kori-brown text-base">{{ number_format($periodicInvestment, 0, ',', ' ') }}
+                                    FCFA</strong> par
+                                {{ $frequency === 'monthly' ? 'mois' : ($frequency === 'quarterly' ? 'trimestre' : 'an') }}.
                             @elseif ($simulationMode === 'duration')
-                                Pour atteindre votre objectif de <strong>{{ number_format($targetCapital, 0, ',', ' ') }} FCFA</strong> net avec un versement régulier de <strong>{{ number_format($periodicInvestment, 0, ',', ' ') }} FCFA</strong>, il vous faudra épargner pendant <strong class="text-kori-brown text-base">{{ $durationText }}</strong>.
+                                Pour atteindre votre objectif de
+                                <strong>{{ number_format($targetCapital, 0, ',', ' ') }} FCFA</strong> net avec un
+                                versement régulier de <strong>{{ number_format($periodicInvestment, 0, ',', ' ') }}
+                                    FCFA</strong>, il vous faudra épargner pendant <strong
+                                    class="text-kori-brown text-base">{{ $durationText }}</strong>.
                             @endif
                         </p>
                     </div>
@@ -543,36 +580,52 @@ $requestContact = function (string $type) {
                     <!-- Solde Final Net -->
                     <div
                         class="bg-gradient-to-br from-kori-dark to-kori-brown text-white rounded-2xl p-6 shadow-md border-l-4 border-kori-gold transform hover:scale-[1.02] transition duration-200">
-                        <span class="text-xs text-kori-gold/80 font-bold uppercase tracking-wider block mb-1">Capital Net Obtenu</span>
-                        <span class="text-3xl font-black text-kori-gold">{{ number_format($simulationResult['summary']['final_net_balance'], 0, ',', ' ') }}</span>
-                        <span class="text-xs text-slate-200 block mt-2 font-light">Net de frais de rachat de {{ number_format($simulationResult['summary']['final_gross_balance'] - $simulationResult['summary']['final_net_balance'], 0, ',', ' ') }} FCFA</span>
+                        <span class="text-xs text-kori-gold/80 font-bold uppercase tracking-wider block mb-1">Capital
+                            Net Obtenu</span>
+                        <span
+                            class="text-3xl font-black text-kori-gold">{{ number_format($simulationResult['summary']['final_net_balance'], 0, ',', ' ') }}</span>
+                        <span class="text-xs text-slate-200 block mt-2 font-light">Net de frais de rachat de
+                            {{ number_format($simulationResult['summary']['final_gross_balance'] - $simulationResult['summary']['final_net_balance'], 0, ',', ' ') }}
+                            FCFA</span>
                     </div>
 
                     <!-- Total Investi -->
-                    <div class="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm transform hover:scale-[1.02] transition duration-200">
-                        <span class="text-xs text-gray-400 font-bold uppercase tracking-wider block mb-1">Total versé</span>
-                        <span class="text-2xl font-extrabold text-kori-brown">{{ number_format($simulationResult['summary']['total_invested'], 0, ',', ' ') }} FCFA</span>
-                        <span class="text-xs text-gray-500 block mt-2 font-light">Apport initial de {{ number_format($initialInvestment, 0, ',', ' ') }} FCFA inclus</span>
+                    <div
+                        class="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm transform hover:scale-[1.02] transition duration-200">
+                        <span class="text-xs text-gray-400 font-bold uppercase tracking-wider block mb-1">Total
+                            versé</span>
+                        <span
+                            class="text-2xl font-extrabold text-kori-brown">{{ number_format($simulationResult['summary']['total_invested'], 0, ',', ' ') }}
+                            FCFA</span>
+                        <span class="text-xs text-gray-500 block mt-2 font-light">Apport initial de
+                            {{ number_format($initialInvestment, 0, ',', ' ') }} FCFA inclus</span>
                     </div>
 
                     <!-- Plus-values Net -->
-                    <div class="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm transform hover:scale-[1.02] transition duration-200">
-                        <span class="text-xs text-gray-400 font-bold uppercase tracking-wider block mb-1">Plus-values Net cumulées</span>
-                        <span class="text-2xl font-extrabold text-emerald-600">+ {{ number_format($simulationResult['summary']['net_gains'], 0, ',', ' ') }} FCFA</span>
-                        <span class="text-xs text-gray-500 block mt-2 font-light">Rendement de la période : {{ number_format($simulationResult['summary']['global_performance_pct'], 1) }} %</span>
+                    <div
+                        class="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm transform hover:scale-[1.02] transition duration-200">
+                        <span class="text-xs text-gray-400 font-bold uppercase tracking-wider block mb-1">Plus-values
+                            Net cumulées</span>
+                        <span class="text-2xl font-extrabold text-emerald-600">+
+                            {{ number_format($simulationResult['summary']['net_gains'], 0, ',', ' ') }} FCFA</span>
+                        <span class="text-xs text-gray-500 block mt-2 font-light">Rendement de la période :
+                            {{ number_format($simulationResult['summary']['global_performance_pct'], 1) }} %</span>
                     </div>
                 </div>
 
                 <!-- Onglets Graphique / Tableau -->
                 <div class="bg-white border border-gray-100 rounded-2xl overflow-hidden">
                     <div class="border-b border-gray-100 bg-slate-50 px-6 py-4 flex items-center justify-between">
-                        <span class="font-bold text-sm text-kori-brown uppercase tracking-wider">Évolution de la croissance</span>
+                        <span class="font-bold text-sm text-kori-brown uppercase tracking-wider">Évolution de la
+                            croissance</span>
 
                         <!-- Toggle de vue -->
                         <div class="flex space-x-2 bg-gray-200 p-0.5 rounded-lg text-xs font-semibold">
-                            <button @click="showTab = 'chart'" :class="showTab === 'chart' ? 'bg-white text-kori-brown shadow-xs' : 'text-gray-600'"
+                            <button @click="showTab = 'chart'"
+                                :class="showTab === 'chart' ? 'bg-white text-kori-brown shadow-xs' : 'text-gray-600'"
                                 class="px-3 py-1.5 rounded-md transition">Graphique</button>
-                            <button @click="showTab = 'table'" :class="showTab === 'table' ? 'bg-white text-kori-brown shadow-xs' : 'text-gray-600'"
+                            <button @click="showTab = 'table'"
+                                :class="showTab === 'table' ? 'bg-white text-kori-brown shadow-xs' : 'text-gray-600'"
                                 class="px-3 py-1.5 rounded-md transition">Tableau</button>
                         </div>
                     </div>
@@ -616,7 +669,8 @@ $requestContact = function (string $type) {
                                                 tronqué pour l'affichage (données complètes dans le PDF) ...</td>
                                         </tr>
                                         @php $last = end($simulationResult['schedule']); @endphp
-                                        <tr class="border-t-2 border-double border-gray-200 text-kori-brown font-bold bg-slate-50">
+                                        <tr
+                                            class="border-t-2 border-double border-gray-200 text-kori-brown font-bold bg-slate-50">
                                             <td class="py-4 px-4 font-extrabold">{{ $last['date_label'] }} (Fin)</td>
                                             <td class="py-4 px-4 text-right">
                                                 {{ number_format($last['periodic_payment'], 0, ',', ' ') }} FCFA</td>
@@ -635,11 +689,13 @@ $requestContact = function (string $type) {
                 </div>
 
                 <!-- ACTIONS ET CONVERSIONS (CTA) -->
-                <div class="bg-gradient-to-br from-slate-50 to-kori-light border border-kori-brown/10 rounded-2xl p-8 space-y-6">
+                <div
+                    class="bg-gradient-to-br from-slate-50 to-kori-light border border-kori-brown/10 rounded-2xl p-8 space-y-6">
                     <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
                         <div>
                             <h3 class="text-lg font-bold text-kori-brown">Vous souhaitez concrétiser ce projet ?</h3>
-                            <p class="text-sm text-gray-500 mt-1">Obtenez les conseils d'un gestionnaire de patrimoine agréé Kori Asset Management.</p>
+                            <p class="text-sm text-gray-500 mt-1">Obtenez les conseils d'un gestionnaire de patrimoine
+                                agréé Kori Asset Management.</p>
                         </div>
 
                         @if (!$contactRequested)
@@ -654,13 +710,15 @@ $requestContact = function (string $type) {
                                 </button>
                             </div>
                         @else
-                            <div class="bg-emerald-100 border border-emerald-200 text-emerald-800 rounded-xl px-4 py-3 flex items-center space-x-2 text-sm font-semibold">
+                            <div
+                                class="bg-emerald-100 border border-emerald-200 text-emerald-800 rounded-xl px-4 py-3 flex items-center space-x-2 text-sm font-semibold">
                                 <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor"
                                     viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
-                                <span>Votre demande a été prise en compte ! Un conseiller Kori prendra contact avec vous rapidement.</span>
+                                <span>Votre demande a été prise en compte ! Un conseiller Kori prendra contact avec vous
+                                    rapidement.</span>
                             </div>
                         @endif
                     </div>
@@ -811,10 +869,14 @@ $requestContact = function (string $type) {
                             labels: {
                                 formatter: function(value) {
                                     if (value >= 1000000) {
-                                        return (value / 1000000).toLocaleString('fr-FR', {maximumFractionDigits: 1}) + " M";
+                                        return (value / 1000000).toLocaleString('fr-FR', {
+                                            maximumFractionDigits: 1
+                                        }) + " M";
                                     }
                                     if (value >= 1000) {
-                                        return (value / 1000).toLocaleString('fr-FR', {maximumFractionDigits: 0}) + " k";
+                                        return (value / 1000).toLocaleString('fr-FR', {
+                                            maximumFractionDigits: 0
+                                        }) + " k";
                                     }
                                     return value.toLocaleString('fr-FR');
                                 },
@@ -862,8 +924,7 @@ $requestContact = function (string $type) {
                                 categories: data.labels
                             }
                         });
-                        this.chart.updateSeries([
-                            {
+                        this.chart.updateSeries([{
                                 name: 'Total Versé (FCFA)',
                                 data: data.invested
                             },
