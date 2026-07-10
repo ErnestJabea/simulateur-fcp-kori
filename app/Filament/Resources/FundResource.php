@@ -138,11 +138,11 @@ class FundResource extends Resource
                     ->sortable(),
                 TextColumn::make('min_initial_investment')
                     ->label('Min Initial')
-                    ->money('XAF')
+                    ->formatStateUsing(fn ($state) => number_format((float) $state, 0, ',', ' ') . ' FCFA')
                     ->sortable(),
                 TextColumn::make('min_periodic_investment')
                     ->label('Min Périodique')
-                    ->money('XAF')
+                    ->formatStateUsing(fn ($state) => number_format((float) $state, 0, ',', ' ') . ' FCFA')
                     ->sortable(),
             ])
             ->filters([
