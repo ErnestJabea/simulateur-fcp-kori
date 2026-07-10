@@ -89,7 +89,7 @@
     <div class="flex items-center justify-between border-b-2 border-kori-brown pb-6 mb-8">
         <div class="flex flex-col items-start select-none">
             <div class="flex items-center space-x-1 font-bold text-3xl tracking-tight text-kori-brown uppercase">
-                <img src="{{ asset('logo.png') }}" alt="Logo Kori">
+                <img src="{{ asset('logo.png') }}" width="150" alt="Logo Kori">
             </div>
         </div>
         <div class="text-right text-xs text-slate-500 font-medium">
@@ -116,7 +116,6 @@
         <div>
             <h2 class="text-[10px] font-bold text-kori-brown/60 uppercase tracking-wider mb-2">Fonds Sélectionné</h2>
             <p class="font-bold text-kori-brown text-base">{{ $fund->name }}</p>
-            <p class="text-xs text-slate-500 mt-1">Code ISIN : {{ $fund->isin }}</p>
             <p class="text-xs text-emerald-600 font-bold">Rendement Cible :
                 {{ number_format($fund->target_annual_return * 100, 2) }} % annuel</p>
         </div>
