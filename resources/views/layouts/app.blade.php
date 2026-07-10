@@ -4,6 +4,11 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Simulateur FCP | Kori Asset Management</title>
+
+    <!-- Favicon Kori -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="alternate icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="apple-touch-icon" href="/favicon.svg">
     
     <!-- Meta SEO -->
     <meta name="description" content="Simulez vos investissements périodiques et planifiez votre avenir financier avec les Fonds Communs de Placement de Kori Asset Management.">
